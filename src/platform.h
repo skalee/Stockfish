@@ -65,7 +65,10 @@ typedef void*(*pt_start_fn)(void*);
 #  define cond_signal(x) pthread_cond_signal(&(x))
 #  define cond_wait(x,y) pthread_cond_wait(&(x),&(y))
 #  define cond_timedwait(x,y,z) pthread_cond_timedwait(&(x),&(y),z)
-#  define thread_create(x,f,t) pthread_create(&(x),NULL,(pt_start_fn)f,t)
-#  define thread_join(x) pthread_join(x, NULL)
+
+// Stub out thread management which is useless in JavaScript
+
+#  define thread_create(x,f,t) (*f)(t)
+#  define thread_join(x) NULL
 
 #endif // #ifndef PLATFORM_H_INCLUDED
