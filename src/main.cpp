@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <string>
+#include <emscripten.h>
 
 #include "bitboard.h"
 #include "evaluate.h"
@@ -27,6 +28,9 @@
 #include "thread.h"
 #include "tt.h"
 #include "ucioption.h"
+
+void dummy_main_loop_iteration() {
+}
 
 int main(int argc, char* argv[]) {
 
@@ -48,6 +52,8 @@ int main(int argc, char* argv[]) {
       args += std::string(argv[i]) + " ";
 
   UCI::loop(args);
+
+  emscripten_set_main_loop(dummy_main_loop_iteration, 1, 1);
 
   Threads.exit();
 }
