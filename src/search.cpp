@@ -1580,11 +1580,15 @@ void Thread::idle_loop() {
 
   assert(!this_sp || (this_sp->masterThread == this && searching));
 
-  while (true)
-  {
+  idle_loop_iteration_1_precondition();
+}
+
+void Thread::idle_loop_iteration_1_precondition() {
+      SplitPoint* this_sp = splitPointsSize ? activeSplitPoint : NULL;
+
       // If we are not searching, wait for a condition to be signaled instead of
       // wasting CPU time polling for work.
-      while ((!searching && Threads.sleepWhileIdle) || exit)
+      if ((!searching && Threads.sleepWhileIdle) || exit)
       {
           if (exit)
           {
@@ -1592,14 +1596,10 @@ void Thread::idle_loop() {
               return;
           }
 
-          // Grab the lock to avoid races with Thread::notify_one()
-          mutex.lock();
-
           // If we are master and all slaves have finished then exit idle_loop
           if (this_sp && !this_sp->slavesMask)
           {
-              mutex.unlock();
-              break;
+              return;
           }
 
           // Do sleep after retesting sleep conditions under lock protection, in
@@ -1607,10 +1607,19 @@ void Thread::idle_loop() {
           // in the meanwhile, allocated us and sent the notify_one() call before
           // we had the chance to grab the lock.
           if (!searching && !exit)
-              sleepCondition.wait(mutex);
-
-          mutex.unlock();
+              sleepCondition.wait(mutex,
+                  boost::bind(&Thread::idle_loop_iteration_1_precondition, *this));
+          else
+              idle_loop_iteration_1_precondition();
       }
+      else
+      {
+          idle_loop_iteration_2_search();
+      }
+}
+
+void Thread::idle_loop_iteration_2_search() {
+      SplitPoint* this_sp = splitPointsSize ? activeSplitPoint : NULL;
 
       // If this thread has been assigned work, launch a search
       if (searching)
@@ -1640,13 +1649,13 @@ void Thread::idle_loop() {
           switch (sp->nodeType) {
           case Root:
               search<SplitPointRoot>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
-              break;
+              return;
           case PV:
               search<SplitPointPV>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
-              break;
+              return;
           case NonPV:
               search<SplitPointNonPV>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
-              break;
+              return;
           default:
               assert(false);
           }
@@ -1685,7 +1694,8 @@ void Thread::idle_loop() {
           if (finished)
               return;
       }
-  }
+
+      idle_loop_iteration_1_precondition();
 }
 
 

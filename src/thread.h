@@ -150,6 +150,9 @@ struct Thread : public ThreadBase {
   SplitPoint* volatile activeSplitPoint;
   volatile int splitPointsSize;
   volatile bool searching;
+
+  void idle_loop_iteration_1_precondition();
+  void idle_loop_iteration_2_search();
 };
 
 
