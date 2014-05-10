@@ -392,3 +392,28 @@ void ThreadPool::start_thinking(const Position& pos, const LimitsType& limits,
   main()->thinking = true;
   main()->notify_one(); // Starts main thread
 }
+
+ConditionVariable::Callback& ConditionVariable::wait(Mutex& m, Continuation cb) {
+  callbacks.push(Callback(cb));
+  return callbacks.back();
+}
+
+ConditionVariable::Callback& ConditionVariable::wait_for(Mutex& m, int ms, Continuation cb) {
+  callbacks.push(Callback(cb));
+  return callbacks.back();
+  //TODO timeout
+}
+
+void ConditionVariable::notify_one() {
+  Callback cb = callbacks.front();
+  if (!callbacks.empty() && cb.conditions_blank_or_met()) {
+    Continuation cont = cb.continuation;
+    callbacks.pop();
+    cont();
+  }
+}
+
+bool ConditionVariable::Callback::conditions_blank_or_met() {
+  return (!this->guard_true || *(this->guard_true))
+      && (!this->guard_false || !*(this->guard_false));
+}

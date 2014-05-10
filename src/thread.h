@@ -21,6 +21,8 @@
 #define THREAD_H_INCLUDED
 
 #include <vector>
+#include <queue>
+#include <boost/function.hpp>
 
 #include "material.h"
 #include "movepick.h"
@@ -30,6 +32,8 @@
 
 const int MAX_THREADS = 64; // Because SplitPoint::slavesMask is a uint64_t
 const int MAX_SPLITPOINTS_PER_THREAD = 8;
+
+typedef boost::function<void()> Continuation;
 
 struct Mutex {
   Mutex() { lock_init(l); }
@@ -45,15 +49,31 @@ private:
 };
 
 struct ConditionVariable {
-  ConditionVariable() { cond_init(c); }
- ~ConditionVariable() { cond_destroy(c); }
 
-  void wait(Mutex& m) { cond_wait(c, m.l); }
-  void wait_for(Mutex& m, int ms) { timed_wait(c, m.l, ms); }
-  void notify_one() { cond_signal(c); }
+  struct Callback {
+
+    Callback(Continuation cont) : continuation(cont), guard_true(NULL), guard_false(NULL) {}
+
+    inline bool conditions_blank_or_met();
+    inline Callback& ensure_true(volatile const bool *cond) { guard_true = cond; return *this; }
+    inline Callback& ensure_false(volatile const bool *cond) { guard_false = cond; return *this; }
+
+    Continuation continuation;
+
+  private:
+    volatile const bool *guard_true;
+    volatile const bool *guard_false;
+
+  };
+
+  ConditionVariable() { }
+
+  Callback& wait(Mutex& m, Continuation);
+  Callback& wait_for(Mutex& m, int ms, Continuation);
+  void notify_one();
 
 private:
-  WaitCondition c;
+  std::queue<Callback> callbacks;
 };
 
 struct Thread;
