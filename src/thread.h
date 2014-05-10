@@ -159,6 +159,8 @@ struct Thread : public ThreadBase {
 struct MainThread : public Thread {
   MainThread() : thinking(true) {} // Avoid a race with start_thinking()
   virtual void idle_loop();
+  void idle_loop_iteration();
+  void idle_loop_blockade();
   volatile bool thinking;
 };
 

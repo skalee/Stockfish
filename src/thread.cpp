@@ -128,17 +128,24 @@ void TimerThread::idle_loop_iteration() {
 // when there is a new search. Main thread will launch all the slave threads.
 
 void MainThread::idle_loop() {
+  idle_loop_iteration();
+}
 
-  while (true)
-  {
+void MainThread::idle_loop_iteration() {
       mutex.lock();
 
       thinking = false;
 
+      idle_loop_blockade();
+}
+
+void MainThread::idle_loop_blockade() {
       while (!thinking && !exit)
       {
           Threads.sleepCondition.notify_one(); // Wake up UI thread if needed
-          sleepCondition.wait(mutex);
+          sleepCondition.wait(mutex,
+              boost::bind(&MainThread::idle_loop_blockade, this));
+          return;
       }
 
       mutex.unlock();
@@ -153,7 +160,8 @@ void MainThread::idle_loop() {
       assert(searching);
 
       searching = false;
-  }
+
+      idle_loop_iteration();
 }
 
 
