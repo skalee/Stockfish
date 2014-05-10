@@ -165,6 +165,8 @@ struct MainThread : public Thread {
 struct TimerThread : public ThreadBase {
   TimerThread() : run(false) {}
   virtual void idle_loop();
+  void idle_loop_iteration();
+
   bool run;
   static const int Resolution = 5; // msec between two check_time() calls
 };

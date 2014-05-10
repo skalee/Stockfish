@@ -99,13 +99,22 @@ Thread::Thread() /* : splitPoints() */ { // Value-initialization bug in MSVC
 extern void check_time();
 
 void TimerThread::idle_loop() {
+  idle_loop_iteration();
+}
 
+void TimerThread::idle_loop_iteration() {
   while (!exit)
   {
       mutex.lock();
 
       if (!exit)
-          sleepCondition.wait_for(mutex, run ? Resolution : INT_MAX);
+      {
+          // This is enough to request for yet another operation.  The timeout
+          // will be infinite if we want to pause the timer.
+          sleepCondition.wait_for(mutex, run ? Resolution : INT_MAX,
+              boost::bind(&TimerThread::idle_loop_iteration, this));
+          return;
+      }
 
       mutex.unlock();
 
