@@ -53,7 +53,8 @@ const string engine_info(bool to_uci) {
   s << (Is64Bit ? " 64" : "")
     << (HasPopCnt ? " SSE4.2" : "")
     << (to_uci ? "\nid author ": " by ")
-    << "Tord Romstad, Marco Costalba and Joona Kiiski";
+    << "Tord Romstad, Marco Costalba and Joona Kiiski, "
+    << "ported to JavaScript by Sebastian Skalacki";
 
   return s.str();
 }
