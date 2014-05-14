@@ -131,18 +131,18 @@ Square msb(Bitboard b) {
 
 void Bitboards::print(Bitboard b) {
 
-  sync_cout;
+  std::ostream& out = sync_cout;
 
   for (Rank rank = RANK_8; rank >= RANK_1; --rank)
   {
-      std::cout << "+---+---+---+---+---+---+---+---+" << '\n';
+      out << "+---+---+---+---+---+---+---+---+" << '\n';
 
       for (File file = FILE_A; file <= FILE_H; ++file)
-          std::cout << "| " << (b & (file | rank) ? "X " : "  ");
+          out << "| " << (b & (file | rank) ? "X " : "  ");
 
-      std::cout << "|\n";
+      out << "|\n";
   }
-  std::cout << "+---+---+---+---+---+---+---+---+" << sync_endl;
+  out << "+---+---+---+---+---+---+---+---+" << sync_endl;
 }
 
 
