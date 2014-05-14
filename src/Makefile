@@ -25,7 +25,7 @@ OBJS = benchmark.bc bitbase.bc bitboard.bc book.bc endgame.bc evaluate.bc \
 	position.bc search.bc thread.bc timeman.bc tt.bc uci.bc ucioption.bc
 
 LIBS_JS =
-PRE_JS  =
+PRE_JS  = pre.js
 POST_JS =
 
 .PHONY: run clean rebuild
