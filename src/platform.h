@@ -20,6 +20,8 @@
 #ifndef PLATFORM_H_INCLUDED
 #define PLATFORM_H_INCLUDED
 
+#define NO_PREFETCH
+
 #ifdef _MSC_VER
 
 // Disable some silly and noisy warning from MSVC compiler
