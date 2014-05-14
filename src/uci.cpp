@@ -42,11 +42,15 @@ namespace {
   // position just before to start searching). Needed by repetition draw detection.
   Search::StateStackPtr SetupStates;
 
+  Position *current_uci_position;
+
   void setoption(istringstream& up);
   void position(Position& pos, istringstream& up);
   void go(const Position& pos, istringstream& up);
 }
 
+
+extern "C" int parse_uci_command(char* cmd){ UCI::parse(string(cmd)); return 0; };
 
 /// Wait for a command from the user, parse this text string as an UCI command,
 /// and call the appropriate functions. Also intercepts EOF from stdin to ensure
@@ -54,13 +58,21 @@ namespace {
 /// commands, the function also supports a few debug commands.
 
 void UCI::loop(const string& args) {
+  current_uci_position = new Position(StartFEN, false, Threads.main()); // The root position
 
-  Position pos(StartFEN, false, Threads.main()); // The root position
-  string token, cmd = args;
+  if (!args.empty()) { // Args have one-shot behaviour
+    parse(args);
+    // TODO quit
+  }
+}
 
-  do {
-      if (args.empty() && !getline(cin, cmd)) // Block here waiting for input
-          cmd = "quit";
+void UCI::parse(const string& cmd) {
+  Position &pos = *current_uci_position;
+  string token;
+
+  // do {
+//      if (args.empty() && !getline(cin, cmd)) // Block here waiting for input
+//          cmd = "quit";
 
       istringstream is(cmd);
 
@@ -118,9 +130,9 @@ void UCI::loop(const string& args) {
       else
           sync_cout << "Unknown command: " << cmd << sync_endl;
 
-  } while (token != "quit" && args.empty()); // Args have one-shot behaviour
+  // } while (token != "quit" && args.empty()); // Args have one-shot behaviour
 
-  Threads.wait_for_think_finished(); // Cannot quit while search is running
+  // Threads.wait_for_think_finished(); // Cannot quit while search is running
 }
 
 

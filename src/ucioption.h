@@ -61,6 +61,7 @@ private:
 
 void init(OptionsMap&);
 void loop(const std::string&);
+void parse(const std::string&);
 
 } // namespace UCI
 

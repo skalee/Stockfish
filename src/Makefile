@@ -4,7 +4,7 @@ MEMORY = 67108864  # 64 MB
 TARGET = ../stockfish.js
 RUNNER = ../stockfish
 
-EXPORTED_FUNCTIONS = _main
+EXPORTED_FUNCTIONS = _main _parse_uci_command uci
 
 CXX = EMCC_FAST_COMPILER=0 em++
 NODE = node
