@@ -2,6 +2,7 @@
 
 MEMORY = 67108864  # 64 MB
 TARGET = ../stockfish.js
+RUNNER = ../stockfish
 
 EXPORTED_FUNCTIONS = _main
 
@@ -40,3 +41,6 @@ clean:
 	- rm $(TARGET) *.bc
 
 rebuild: clean $(TARGET)
+
+run: $(TARGET) $(RUNNER)
+	./$(RUNNER)
