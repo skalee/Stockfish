@@ -20,5 +20,9 @@
 var Module = {
   'uci': function(cmd) {
     Module.ccall('parse_uci_command', 'number', ['string'], [cmd]);
+  },
+
+  'emit': function(response) {
+    Module.print(response);
   }
 };

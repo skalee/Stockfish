@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <emscripten.h>
 
 #include "misc.h"
 #include "thread.h"
@@ -138,21 +139,20 @@ public:
 };
 
 
-/// Used to serialize access to std::cout to avoid multiple threads to write at
-/// the same time.
-
-std::ostream& operator<<(std::ostream& os, SyncCout sc) {
-
-  static Mutex m;
-
-  if (sc == io_lock)
-      m.lock();
-
-  if (sc == io_unlock)
-      m.unlock();
-
-  return os;
+int EventedOStream::EventedBuf::sync() {
+  if(!str().empty()) {
+    const string to_emit = str();
+    EM_ASM_INT({
+      Module.emit(Module.Pointer_stringify($0));
+      return 0;
+    }, to_emit.c_str());
+  }
+  str("");
+  return 0;
 }
+
+
+EventedOStream eout;
 
 
 /// Trampoline helper to avoid moving Logger to misc.h

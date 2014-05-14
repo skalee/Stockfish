@@ -21,6 +21,8 @@
 #define MISC_H_INCLUDED
 
 #include <fstream>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -36,6 +38,7 @@ extern void dbg_hit_on_c(bool c, bool b);
 extern void dbg_mean_of(int v);
 extern void dbg_print();
 
+extern "C" void emit_uci_response(const char*);
 
 struct Log : public std::ofstream {
   Log(const std::string& f = "log.txt") : std::ofstream(f.c_str(), std::ios::out | std::ios::app) {}
@@ -59,10 +62,25 @@ private:
 };
 
 
-enum SyncCout { io_lock, io_unlock };
-std::ostream& operator<<(std::ostream&, SyncCout);
+class EventedOStream : public std::ostream {
 
-#define sync_cout std::cout << io_lock
-#define sync_endl std::endl << io_unlock
+private:
+  class EventedBuf : public std::stringbuf {
+  public:
+   ~EventedBuf() { pubsync(); }
+    int sync();
+  };
+
+public:
+  EventedOStream() : std::ostream(new EventedBuf) {}
+ ~EventedOStream() { delete rdbuf(); }
+
+};
+
+
+extern EventedOStream eout;
+
+#define sync_cout eout
+#define sync_endl std::flush
 
 #endif // #ifndef MISC_H_INCLUDED
