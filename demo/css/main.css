@@ -1,0 +1,42 @@
+body {
+  width: 780px;
+  margin: 50px auto 0 auto;
+  font-family: sans-serif;
+}
+
+#board {
+  float: left;
+}
+
+#side {
+  width: 200px;
+  float: right;
+}
+
+#status {
+  height: 40px;
+  line-height: 40px;
+}
+
+#pick-side a {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background-size: 40px;
+  vertical-align: baseline;
+  cursor: pointer;
+}
+
+#pick-side span {
+  display: inline-block;;
+  height: 40px;
+  vertical-align: middle;
+}
+
+#pick-white {
+  background-image: url(../images/chesspieces/wikipedia/wK.png);
+}
+
+#pick-black {
+  background-image: url(../images/chesspieces/wikipedia/bK.png);
+}
