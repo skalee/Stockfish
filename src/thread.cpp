@@ -19,6 +19,7 @@
 
 #include <algorithm> // For std::count
 #include <cassert>
+#include <boost/bind.hpp>
 
 #include "movegen.h"
 #include "search.h"
@@ -354,11 +355,14 @@ template void Thread::split< true>(Position&, const Stack*, Value, Value, Value*
 
 // wait_for_think_finished() waits for main thread to go to sleep then returns
 
-void ThreadPool::wait_for_think_finished() {
+void ThreadPool::wait_for_think_finished(Continuation cont) {
 
   MainThread* t = main();
   t->mutex.lock();
-  while (t->thinking) sleepCondition.wait(t->mutex);
+  if (t->thinking)
+    sleepCondition.wait(t->mutex, cont).ensure_false(&t->thinking);
+  else
+    cont();
   t->mutex.unlock();
 }
 
@@ -368,7 +372,13 @@ void ThreadPool::wait_for_think_finished() {
 
 void ThreadPool::start_thinking(const Position& pos, const LimitsType& limits,
                                 const std::vector<Move>& searchMoves, StateStackPtr& states) {
-  wait_for_think_finished();
+  wait_for_think_finished(
+    boost::bind(&ThreadPool::start_thinking_cont, this, pos, limits, searchMoves, boost::ref(states)));
+
+}
+
+void ThreadPool::start_thinking_cont(const Position& pos, const LimitsType& limits,
+                                const std::vector<Move>& searchMoves, StateStackPtr& states) {
 
   SearchTime = Time::now(); // As early as possible
 

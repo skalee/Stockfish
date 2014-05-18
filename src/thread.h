@@ -182,8 +182,10 @@ struct ThreadPool : public std::vector<Thread*> {
   MainThread* main() { return static_cast<MainThread*>((*this)[0]); }
   void read_uci_options();
   Thread* available_slave(const Thread* master) const;
-  void wait_for_think_finished();
+  void wait_for_think_finished(Continuation);
   void start_thinking(const Position&, const Search::LimitsType&,
+                      const std::vector<Move>&, Search::StateStackPtr&);
+  void start_thinking_cont(const Position&, const Search::LimitsType&,
                       const std::vector<Move>&, Search::StateStackPtr&);
 
   bool sleepWhileIdle;
