@@ -104,6 +104,7 @@ extern StateStackPtr SetupStates;
 extern void init();
 extern size_t perft(Position& pos, Depth depth);
 extern void think();
+extern void print_best_move();
 
 } // namespace Search
 

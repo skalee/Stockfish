@@ -115,7 +115,7 @@ struct ThreadBase {
   virtual ~ThreadBase() {}
   virtual void idle_loop() = 0;
   void notify_one();
-  void wait_for(volatile const bool& b);
+  void wait_for(volatile const bool& b, Continuation);
 
   Mutex mutex;
   ConditionVariable sleepCondition;

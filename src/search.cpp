@@ -24,6 +24,7 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <boost/bind.hpp>
 
 #include "book.h"
 #include "evaluate.h"
@@ -271,9 +272,14 @@ finalize:
   if (!Signals.stop && (Limits.ponder || Limits.infinite))
   {
       Signals.stopOnPonderhit = true;
-      RootPos.this_thread()->wait_for(Signals.stop);
+      RootPos.this_thread()->wait_for(Signals.stop, &print_best_move); // TODO
   }
+  else
+      print_best_move();
 
+}
+
+void Search::print_best_move() {
   // Best move could be MOVE_NONE when searching on a stalemate position
   sync_cout << "bestmove " << move_to_uci(RootMoves[0].pv[0], RootPos.is_chess960())
             << " ponder "  << move_to_uci(RootMoves[0].pv[1], RootPos.is_chess960())
